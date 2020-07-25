@@ -72,10 +72,11 @@ dashboardPage(
                      icon = icon('project-diagram')
                     ),
                 conditionalPanel('input.sidebar == "modelling"',
-                     selectizeInput('ml_model',
+                     radioButtons('ml_model',
                                     'Select the type of model',
-                                    choices = c('Lasso', 'Random Forest'),
-                                    selected = 'Lasso'
+                                    choices = list('Lasso' = 1 ,
+                                                   'Random Forest' = 2),
+                                    selected = 1
                                     ),
                      conditionalPanel('input.ml_model == "Lasso"',
                         sliderInput('lambda', 'Lambda',
@@ -228,8 +229,15 @@ dashboardPage(
                     ),
             
             # Modelling tab ---------------------------
-            tabItem('modelling'
+            tabItem('modelling',
+                    fluidRow(
+                        column(width = 4,
+                            h2(uiOutput('model_title'))),
+                        column(width = 3,
+                            h5(uiOutput('model_sub'))),
+                    fluidRow()
                     )
+            )
         )
     )
 )

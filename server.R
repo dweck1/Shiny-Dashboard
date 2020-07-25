@@ -134,5 +134,23 @@ shinyServer(function(input, output, session) {
   
 #Modelling Tab ----------------------------------------
   
+  output$model_title <- renderUI({
+    
+    if(input$ml_model == 1){
+      'Lasso Model for NFL Data'
+    }
+    else{'Random Forest Model for NFL Data'}
+  })
+  
+  output$model_sub <- renderUI({
+    
+    if(input$ml_model == 1){
+      withMathJax(
+        helpText('Note: Tuning parameter lambda penalizes loss function by adding: 
+                 $$\\lambda\\sum_{j=1}^p|\\beta_j|$$')
+      )
+    }
+  })
+  
 })
 
