@@ -179,7 +179,7 @@ dashboardPage(
                         column(width = 6,
                                h4(uiOutput('hist_title'), align = 'center'),
                                plotlyOutput('hist'))
-                    )
+                    ) 
             ),
             
             # Clustering tab --------------------------

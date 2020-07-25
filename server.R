@@ -92,7 +92,7 @@ shinyServer(function(input, output, session) {
   })
   
   
-#Clustering Tab ---------------------------------------
+#Clustering Tab --------------------------------------- 
   
   cluster_data <- reactive({
     NFL[, c(input$clustering_var1, input$clustering_var2)]
