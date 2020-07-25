@@ -1,8 +1,7 @@
 library(shiny)
 library(shinydashboard)
-library(DT)
 
-source('analysis.R')
+source('data.R')
 
 shinyServer(function(input, output, session) {
 

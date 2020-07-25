@@ -1,7 +1,7 @@
 library(shiny)
 library(shinydashboard)
 
-source('analysis.R')
+source('data.R')
 
 dashboardPage(
     
@@ -31,12 +31,13 @@ dashboardPage(
                                    'Explore a specific team'
                                   ),
                     conditionalPanel('input.team_bool',
-                                     selectizeInput('eda_team',
-                                                    'Select a team to explore',
-                                                    choices = as.factor(NFL$team),
-                                                    selected = 'GB')
-                                     )
-                                ),
+                         selectizeInput('eda_team',
+                                        'Select a team to explore',
+                                        choices = as.factor(NFL$team),
+                                        selected = NULL
+                                        )
+                    )
+                ),
             
             
             menuItem('Clustering', 
@@ -64,12 +65,48 @@ dashboardPage(
                                     'Select linkage for hierarchical clustering',
                                     choices = c('complete', 'single', 'average'),
                                     selected = 'complete'),
-                     ),
+                ),
             
             menuItem('Modelling', 
                      tabName = 'modelling', 
                      icon = icon('project-diagram')
                     ),
+                conditionalPanel('input.sidebar == "modelling"',
+                     selectizeInput('ml_model',
+                                    'Select the type of model',
+                                    choices = c('Lasso', 'Random Forest'),
+                                    selected = 'Lasso'
+                                    ),
+                     conditionalPanel('input.ml_model == "Lasso"',
+                        sliderInput('lambda', 'Lambda',
+                                    min = 0, 
+                                    max = 1000,
+                                    value = 0
+                                    )
+                        ),
+                     conditionalPanel('input.ml_model == "Random Forest"',
+                        selectizeInput('n_trees', 'Select the number of trees',
+                                       choices = c(300, 400, 500, 600, 700, 800, 900, 100),
+                                       selected = 500
+                                       )
+                        ),
+                     checkboxGroupInput('ml_vars',
+                                        'Which statistics would you like to use?',
+                                        choices = list('Offensive' = 1,
+                                                       'Defensive' = 2),
+                                        selected = c(1,2)
+                                        ),
+                     checkboxInput('predictions',
+                                   'Make predictions for 2020'
+                                   ),
+                     conditionalPanel('input.predictions',
+                        selectizeInput('prediction_team',
+                                       'Select which team to predict',
+                                       choices = as.factor(NFL$team),
+                                       selected = NULL)
+                        )
+                     
+                 ),
             
             menuItem('Data', 
                      tabName = 'data', 
@@ -187,7 +224,12 @@ dashboardPage(
                     h2('K-Means Clustering of 2 Predictors'),
                     plotlyOutput('clust_plot'),
                     h2('Dendrogram from Hierarchical Clustering of the 2 Predictors'),
-                    plotOutput('dendrogram'))
+                    plotOutput('dendrogram')
+                    ),
+            
+            # Modelling tab ---------------------------
+            tabItem('modelling'
+                    )
         )
     )
 )
