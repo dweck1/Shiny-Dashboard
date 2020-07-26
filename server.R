@@ -1,7 +1,8 @@
 library(shiny)
 library(shinydashboard)
+library(plotly)
 library(gbm)
-library(Rborist)
+library(pls)
 library(DT)
 
 source('data.R')
@@ -142,7 +143,7 @@ shinyServer(function(input, output, session) {
     if(input$ml_model == "Gradient Boosted Trees"){
       'Gradient Boosting Model for NFL Data'
     }
-    else{'Random Forest Model for NFL Data'}
+    else{'Principal Components Regression Model for NFL Data'}
   })
   
   output$model_sub <- renderUI({
@@ -163,26 +164,52 @@ shinyServer(function(input, output, session) {
     }
     else {
       
-        Rborist(x_vars, NFL_df$wins_next_year, nTree = input$rf_trees)
+        pcr(wins_next_year ~ ., data = NFL_df, 
+            ncomp = input$ncomps,
+            scale = TRUE)
       
     }
   })
 
-  pred_team_data <- reactive({filter(NFL_2019, team == input$prediction_team)})
+  pred_team_data <- reactive({filter(NFL_pred_df, team == input$prediction_team)})
   
   prediction <- reactive({
     if(input$ml_model == 'Gradient Boosted Trees'){
         predict(model(), newdata = pred_team_data(), n.trees = input$gbm_trees)
     }
     else{
-        predict(model(), newdata = pred_team_data())
+        predict(model(), newdata = pred_team_data(), ncomp = input$ncomps)
+    }
+    
+  })
+  
+  output$pred_plot <- renderPlot({
+    
+    if(input$ml_model == 'Gradient Boosted Trees'){
+      ggplot(summary(model()), aes(x = reorder(var, rel.inf), y  = rel.inf)) +
+        geom_bar(stat = 'identity', fill = filter(NFL, team == input$prediction_team)$primary[1]) +
+        coord_flip() +
+        labs(x = 'Variable', y = 'Variable Importance', 
+             title = 'Variable Importance from Selected Gradient Boosted Model')
+    }
+    else{
+      plot(1:input$ncomps, 100* (cumsum(model()$Xvar) / model()$Xtotvar), 
+           type = 'b', lwd = 4, pch = 19, col = filter(NFL, team == input$prediction_team)$primary[1],
+           xlab = 'Principal Component',
+           ylab = 'Percentage of Variance Explained',
+           main = 'Percentage of Variance Explained by Selected Number of Principal Components')
     }
     
   })
 
-  output$pred <- renderUI({
+  output$pred <- renderText({
     if(input$prediction_team %in% as.factor(NFL$team)){
-      paste(input$prediction_team, 'is predicted to win', round(prediction(), 0), 'games')
+      
+      background_color <- filter(NFL, team == input$prediction_team)$secondary[1]
+      HTML(paste0("<div style='color:",background_color,"'>",
+      paste0(input$prediction_team, ' is predicted to win ', round(prediction(), 0), ' games'),
+      "</div>"))
+      
     }
     else{
       'No team has been selected yet.'

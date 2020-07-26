@@ -75,7 +75,7 @@ dashboardPage(
                 conditionalPanel('input.sidebar == "modelling"',
                      selectizeInput('ml_model',
                                     'Select the type of model',
-                                    choices = c('Gradient Boosted Trees', 'Random Forest'),
+                                    choices = c('Gradient Boosted Trees', 'Principal Components Regression'),
                                     selected = 'Random Forest'),
                      conditionalPanel('input.ml_model == "Gradient Boosted Trees"',
                             selectizeInput('gbm_trees', 'Select the number of trees',
@@ -89,10 +89,12 @@ dashboardPage(
                                         step = .05
                                       )
                      ),
-                     conditionalPanel('input.ml_model == "Random Forest"',
-                            selectizeInput('rf_trees', 'Select the number of trees',
-                                            choices = c(300, 400, 500, 600, 700, 800, 900, 1000),
-                                            selected = 500
+                     conditionalPanel('input.ml_model == "Principal Components Regression"',
+                            sliderInput('ncomps', 'Select the number of principal components',
+                                        min = 1,
+                                        max = 30,
+                                        value = 10,
+                                        step = 1
                                       ),
 
                      ),
@@ -160,10 +162,10 @@ dashboardPage(
                           'displays the clusters and centroids created from the selected K-Means options. The user',
                           'can also perform hierarchical clustering and select which linkage method they would like.',
                           'A dendrogram is plotted with the result. On the', strong("Modelling"), 'tab, there',
-                          'are options to create Gradient Boosted Trees and Random Forest models to predict the',
-                          'number of games a team will win next year. The user has the option to adjust certain',
-                          'tuning parameters for each model. Finally, on the', strong("Data"), 'tab, the user can',
-                          'view and download the entire dataset or a dataset filtered by team.')
+                          'are options to create Gradient Boosted Trees and Principal Components Regression models',
+                          'to predict the number of games a team will win next year. The user has the option to',
+                          'adjust certain tuning parameters for each model. Finally, on the', strong("Data"), 'tab,',
+                          'the user can view and download the entire dataset or a dataset filtered by a team.')
                     ),
                     
                     box(
@@ -230,14 +232,16 @@ dashboardPage(
             # Modelling tab ---------------------------
             tabItem('modelling',
                     fluidRow(
-                        column(width = 6,
+                        column(width = 9,
                             h2(uiOutput('model_title'))),
                         column(width = 3,
                             h5(uiOutput('model_sub'))),
                     ),
                     fluidRow(
-                        column(width = 12,
-                               h3(uiOutput('pred')))
+                        column(width = 6,
+                               plotOutput('pred_plot')),
+                        column(width = 6,
+                               h2(uiOutput('pred')))
                     )
             ),
             
@@ -246,7 +250,7 @@ dashboardPage(
                     selectizeInput('data_team',
                                    'Select a team to filter on',
                                    choices = as.factor(NFL$team),
-                                   selected = 'GB'),
+                                   selected = NULL),
                     dataTableOutput('data_table'),
                     downloadButton('download_data', 'Download as CSV')
             )
