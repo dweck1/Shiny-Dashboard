@@ -82,7 +82,10 @@ shinyServer(function(input, output, session) {
     }
     else{
       hist <- plot_ly(eda_team_data(), x = ~get(input$eda_var1), 
-                      type = 'histogram', color = ~team, colors = ~secondary, nbinsx = 20)
+                      type = 'histogram', nbinsx = 20,
+                      marker = list(color = ~secondary,
+                                    line = list(color = ~primary,
+                                                width = 3)))
       hist <- hist %>% layout(xaxis = list(title = str_to_title(str_replace_all(input$eda_var1, '_', ' '))),
                               yaxis = list(title = ''))
       hist
@@ -198,7 +201,9 @@ shinyServer(function(input, output, session) {
     
     if(input$ml_model == 'Gradient Boosted Trees'){
       ggplot(summary(model()), aes(x = reorder(var, rel.inf), y  = rel.inf)) +
-        geom_bar(stat = 'identity', fill = filter(NFL, team == input$prediction_team)$primary[1]) +
+        geom_bar(stat = 'identity', 
+                 fill = filter(NFL, team == input$prediction_team)$primary[1],
+                 color = filter(NFL, team == input$prediction_team)$secondary[1]) +
         coord_flip() +
         labs(x = 'Variable', y = 'Variable Importance', 
              title = 'Variable Importance from Selected Gradient Boosted Model')
