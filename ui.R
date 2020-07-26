@@ -86,7 +86,7 @@ dashboardPage(
                             ),
                             sliderInput('shrinkage', 'Shrinkage',
                                         min = 0, 
-                                        max = 1,
+                                        max = .5,
                                         value = .1,
                                         step = .05
                             )
