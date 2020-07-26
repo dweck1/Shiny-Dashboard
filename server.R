@@ -1,5 +1,8 @@
 library(shiny)
 library(shinydashboard)
+library(gbm)
+library(Rborist)
+library(DT)
 
 source('data.R')
 
@@ -136,21 +139,75 @@ shinyServer(function(input, output, session) {
   
   output$model_title <- renderUI({
     
-    if(input$ml_model == 1){
-      'Lasso Model for NFL Data'
+    if(input$ml_model == "Gradient Boosted Trees"){
+      'Gradient Boosting Model for NFL Data'
     }
     else{'Random Forest Model for NFL Data'}
   })
   
   output$model_sub <- renderUI({
-    
-    if(input$ml_model == 1){
+
       withMathJax(
-        helpText('Note: Tuning parameter lambda penalizes loss function by adding: 
-                 $$\\lambda\\sum_{j=1}^p|\\beta_j|$$')
+        helpText('Note: Both models attempt to minimize mean squared error: $$\\frac{1}{n}\\sum_{i=1}^{n}(y_{i} - \\hat{f}(x_{i})) ^ 2$$')
       )
+    
+  })
+  
+  model <- reactive({
+    
+    if(input$ml_model == 'Gradient Boosted Trees'){
+      
+        gbm(wins_next_year ~ ., data = NFL_df, distribution = 'gaussian', 
+            n.trees = input$gbm_trees,
+            shrinkage = input$shrinkage)
+    }
+    else {
+      
+      Rborist(x_vars, NFL_df$wins_next_year, nTree = input$rf_trees)
+      
+      }
+  })
+
+  pred_team_data <- reactive({filter(NFL_2019, team == input$prediction_team)})
+  
+  prediction <- reactive({
+    if(input$ml_model == 'Gradient Boosted Trees'){
+        predict(model(), newdata = pred_team_data(), n.trees = input$gbm_trees)
+    }
+    else{
+        predict(model(), newdata = pred_team_data())
+    }
+    
+  })
+
+  output$pred <- renderUI({
+    if(input$prediction_team %in% as.factor(NFL$team)){
+      paste(input$prediction_team, 'is predicted to win', round(prediction(), 0), 'games')
+    }
+    else{
+      'No team has been selected yet.'
     }
   })
   
-})
+#Data Tab ---------------------------------------------
+  
+  table_data <- reactive({
+    
+    if(input$data_team %in% as.factor(NFL$team)){
+      filter(NFL, team == input$data_team)
+    }
+    else {
+      NFL
+    }
+  })
 
+  output$data_table <- renderDataTable({table_data()})
+  
+  output$download_data <- downloadHandler(
+    filename = "selected_NFL_data.csv",
+    content = function(file) {
+      write_csv(table_data(), file)
+    },
+    contentType = "text/csv"
+  )
+})

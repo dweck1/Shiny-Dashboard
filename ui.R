@@ -72,31 +72,29 @@ dashboardPage(
                      icon = icon('project-diagram')
                     ),
                 conditionalPanel('input.sidebar == "modelling"',
-                     radioButtons('ml_model',
+                     selectizeInput('ml_model',
                                     'Select the type of model',
-                                    choices = list('Lasso' = 1 ,
-                                                   'Random Forest' = 2),
-                                    selected = 1
-                                    ),
-                     conditionalPanel('input.ml_model == "Lasso"',
-                        sliderInput('lambda', 'Lambda',
-                                    min = 0, 
-                                    max = 1000,
-                                    value = 0
-                                    )
-                        ),
+                                    choices = c('Gradient Boosted Trees', 'Random Forest'),
+                                    selected = 'Random Forest'),
+                     conditionalPanel('input.ml_model == "Gradient Boosted Trees"',
+                            selectizeInput('gbm_trees', 'Select the number of trees',
+                                            choices = c(300, 400, 500, 600, 700, 800, 900, 1000),
+                                            selected = 500
+                                      ),
+                            sliderInput('shrinkage', 'Shrinkage',
+                                        min = 0, 
+                                        max = 1,
+                                        value = .1,
+                                        step = .05
+                                      )
+                     ),
                      conditionalPanel('input.ml_model == "Random Forest"',
-                        selectizeInput('n_trees', 'Select the number of trees',
-                                       choices = c(300, 400, 500, 600, 700, 800, 900, 100),
-                                       selected = 500
-                                       )
-                        ),
-                     checkboxGroupInput('ml_vars',
-                                        'Which statistics would you like to use?',
-                                        choices = list('Offensive' = 1,
-                                                       'Defensive' = 2),
-                                        selected = c(1,2)
-                                        ),
+                            selectizeInput('rf_trees', 'Select the number of trees',
+                                            choices = c(300, 400, 500, 600, 700, 800, 900, 1000),
+                                            selected = 500
+                                      ),
+
+                     ),
                      checkboxInput('predictions',
                                    'Make predictions for 2020'
                                    ),
@@ -161,10 +159,10 @@ dashboardPage(
                           'displays the clusters and centroids created from the selected K-Means options. The user',
                           'can also perform hierarchical clustering and select which linkage method they would like.',
                           'A dendrogram is plotted with the result. On the', strong("Modelling"), 'tab, there',
-                          'are options to create LASSO and Random Forest models to predict the total number of games',
-                          'a team will win next year. The user has the option to adjust certain tuning parameters',
-                          'for each model. Finally, on the', strong("Data"), 'tab, the user can view and download',
-                          'the entire dataset or a dataset filtered by team.')
+                          'are options to create Gradient Boosted Trees and Random Forest models to predict the',
+                          'number of games a team will win next year. The user has the option to adjust certain',
+                          'tuning parameters for each model. Finally, on the', strong("Data"), 'tab, the user can',
+                          'view and download the entire dataset or a dataset filtered by team.')
                     ),
                     
                     box(
@@ -231,12 +229,23 @@ dashboardPage(
             # Modelling tab ---------------------------
             tabItem('modelling',
                     fluidRow(
-                        column(width = 4,
+                        column(width = 6,
                             h2(uiOutput('model_title'))),
                         column(width = 3,
                             h5(uiOutput('model_sub'))),
-                    fluidRow()
+                    ),
+                    fluidRow(h3(uiOutput('pred'))
                     )
+            ),
+            
+            # Data Tab --------------------------------
+            tabItem('data',
+                    selectizeInput('data_team',
+                                   'Select a team to filter on',
+                                   choices = as.factor(NFL$team),
+                                   selected = 'GB'),
+                    dataTableOutput('data_table'),
+                    downloadButton('download_data', 'Download as CSV')
             )
         )
     )
