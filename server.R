@@ -163,9 +163,9 @@ shinyServer(function(input, output, session) {
     }
     else {
       
-      Rborist(x_vars, NFL_df$wins_next_year, nTree = input$rf_trees)
+        Rborist(x_vars, NFL_df$wins_next_year, nTree = input$rf_trees)
       
-      }
+    }
   })
 
   pred_team_data <- reactive({filter(NFL_2019, team == input$prediction_team)})
@@ -201,7 +201,11 @@ shinyServer(function(input, output, session) {
     }
   })
 
-  output$data_table <- renderDataTable({table_data()})
+  output$data_table <- renderDataTable({
+    
+    datatable(table_data(), options = list(scrollX = TRUE))
+    
+    })
   
   output$download_data <- downloadHandler(
     filename = "selected_NFL_data.csv",

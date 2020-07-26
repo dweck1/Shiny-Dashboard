@@ -1,5 +1,6 @@
 library(shiny)
 library(shinydashboard)
+library(DT)
 
 source('data.R')
 
@@ -234,7 +235,9 @@ dashboardPage(
                         column(width = 3,
                             h5(uiOutput('model_sub'))),
                     ),
-                    fluidRow(h3(uiOutput('pred'))
+                    fluidRow(
+                        column(width = 12,
+                               h3(uiOutput('pred')))
                     )
             ),
             
