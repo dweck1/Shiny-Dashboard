@@ -54,7 +54,7 @@ shinyServer(function(input, output, session) {
   #Title for scatterplot
   output$scatter_title <- renderUI({
     paste('Scatterplot of Wins Next Year vs', str_to_title(str_replace_all(input$eda_var1,'_', ' ')), '(Jitter Added)')
-    })
+  })
   
   #Summary stats for wins
   output$wins_table <- renderTable({
@@ -97,14 +97,17 @@ shinyServer(function(input, output, session) {
   
 #Clustering Tab --------------------------------------- 
   
+  #Two cluster variables
   cluster_data <- reactive({
     NFL[, c(input$clustering_var1, input$clustering_var2)]
   })
   
+  #KMeans
   kmeans_clust <- reactive({
     kmeans(cluster_data(), centers = input$n_clusters)
   })
   
+  #KMeans plot
   output$clust_plot <- renderPlotly({
     
     clust_plot <- plot_ly(cluster_data(), x = ~get(input$clustering_var1), y = ~get(input$clustering_var2),
@@ -124,10 +127,12 @@ shinyServer(function(input, output, session) {
                   hide_colorbar()
   })
   
+  #Hierarchical
   hclustering <- reactive({
     hclust(dist(cluster_data()), method = input$linkage)
   })
   
+  #Dendrogram
   output$dendrogram <- renderPlot({
     plot(as.dendrogram(hclustering()), xlab = 'Height', ylab = '', main = 'Dendrogram',
          nodePar = list(pch = 19, col = 2, cex = .2),
@@ -138,6 +143,7 @@ shinyServer(function(input, output, session) {
   
 #Modelling Tab ----------------------------------------
   
+  #Model title
   output$model_title <- renderUI({
     
     if(input$ml_model == "Gradient Boosted Trees"){
@@ -146,6 +152,7 @@ shinyServer(function(input, output, session) {
     else{'Principal Components Regression Model for NFL Data'}
   })
   
+  #Model Mathjax
   output$model_sub <- renderUI({
 
       withMathJax(
@@ -154,6 +161,7 @@ shinyServer(function(input, output, session) {
     
   })
   
+  #Fitting models
   model <- reactive({
     
     if(input$ml_model == 'Gradient Boosted Trees'){
@@ -170,9 +178,11 @@ shinyServer(function(input, output, session) {
       
     }
   })
-
+  
+  #Prediction data
   pred_team_data <- reactive({filter(NFL_pred_df, team == input$prediction_team)})
   
+  #Making predictions
   prediction <- reactive({
     if(input$ml_model == 'Gradient Boosted Trees'){
         predict(model(), newdata = pred_team_data(), n.trees = input$gbm_trees)
@@ -183,6 +193,7 @@ shinyServer(function(input, output, session) {
     
   })
   
+  #Getting plots for predictions
   output$pred_plot <- renderPlot({
     
     if(input$ml_model == 'Gradient Boosted Trees'){
@@ -197,17 +208,18 @@ shinyServer(function(input, output, session) {
            type = 'b', lwd = 4, pch = 19, col = filter(NFL, team == input$prediction_team)$primary[1],
            xlab = 'Principal Component',
            ylab = 'Percentage of Variance Explained',
-           main = 'Percentage of Variance Explained by Selected Number of Principal Components')
+           main = 'Cumulative Percentage of Variance Explained by Selected Principal Components')
     }
     
   })
 
+  #Prediction text
   output$pred <- renderText({
     if(input$prediction_team %in% as.factor(NFL$team)){
       
       background_color <- filter(NFL, team == input$prediction_team)$secondary[1]
       HTML(paste0("<div style='color:",background_color,"'>",
-      paste0(input$prediction_team, ' is predicted to win ', round(prediction(), 0), ' games'),
+      paste0(input$prediction_team, ' is predicted to win ', strong(round(prediction(), 0)), ' games'),
       "</div>"))
       
     }
@@ -218,6 +230,7 @@ shinyServer(function(input, output, session) {
   
 #Data Tab ---------------------------------------------
   
+  #Creating table data
   table_data <- reactive({
     
     if(input$data_team %in% as.factor(NFL$team)){
@@ -228,12 +241,14 @@ shinyServer(function(input, output, session) {
     }
   })
 
+  #Creating table
   output$data_table <- renderDataTable({
     
     datatable(table_data(), options = list(scrollX = TRUE))
     
     })
   
+  #Option to download
   output$download_data <- downloadHandler(
     filename = "selected_NFL_data.csv",
     content = function(file) {
@@ -241,4 +256,5 @@ shinyServer(function(input, output, session) {
     },
     contentType = "text/csv"
   )
+  
 })

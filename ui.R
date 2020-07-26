@@ -16,27 +16,27 @@ dashboardPage(
             menuItem('Info',  
                      tabName = 'info', 
                      icon = icon('info-circle')
-                    ),
+            ),
             
             menuItem('EDA', 
                      tabName = 'eda', 
                      icon = icon('chart-bar')
-                    ),
+             ),
                 conditionalPanel('input.sidebar == "eda"',
                     selectizeInput('eda_var1',
                                     'Select a predictor to explore',
                                     choices = colnames(x_vars),
                                     selected = 'points_scored'
-                                    ),
+                    ),
                     checkboxInput('team_bool',
                                    'Explore a specific team'
-                                  ),
+                    ),
                     conditionalPanel('input.team_bool',
                          selectizeInput('eda_team',
                                         'Select a team to explore',
                                         choices = as.factor(NFL$team),
                                         selected = NULL
-                                        )
+                        )
                     )
                 ),
             
@@ -50,44 +50,46 @@ dashboardPage(
                                     'Select the X variable',
                                     choices = colnames(x_vars),
                                     selected = 'points_scored'
-                                    ),
+                     ),
                      selectizeInput('clustering_var2',
                                     'Select the Y variable',
                                     choices = colnames(x_vars),
                                     selected = 'yards_per_play'
-                                    ),
+                     ),
                      sliderInput('n_clusters',
                                  'Select the number of clusters',
                                  min = 1,
                                  max = 10,
                                  value = 4
-                                 ),
+                    ),
                      selectizeInput('linkage',
                                     'Select linkage for hierarchical clustering',
                                     choices = c('complete', 'single', 'average'),
-                                    selected = 'complete'),
+                                    selected = 'complete'
+                    ),
                 ),
             
             menuItem('Modelling', 
                      tabName = 'modelling', 
                      icon = icon('project-diagram')
-                    ),
+            ),
                 conditionalPanel('input.sidebar == "modelling"',
                      selectizeInput('ml_model',
                                     'Select the type of model',
                                     choices = c('Gradient Boosted Trees', 'Principal Components Regression'),
-                                    selected = 'Random Forest'),
+                                    selected = 'Random Forest'
+                     ),
                      conditionalPanel('input.ml_model == "Gradient Boosted Trees"',
                             selectizeInput('gbm_trees', 'Select the number of trees',
                                             choices = c(300, 400, 500, 600, 700, 800, 900, 1000),
                                             selected = 500
-                                      ),
+                            ),
                             sliderInput('shrinkage', 'Shrinkage',
                                         min = 0, 
                                         max = 1,
                                         value = .1,
                                         step = .05
-                                      )
+                            )
                      ),
                      conditionalPanel('input.ml_model == "Principal Components Regression"',
                             sliderInput('ncomps', 'Select the number of principal components',
@@ -95,27 +97,28 @@ dashboardPage(
                                         max = 30,
                                         value = 10,
                                         step = 1
-                                      ),
+                            ),
 
                      ),
                      checkboxInput('predictions',
                                    'Make predictions for 2020'
-                                   ),
+                     ),
                      conditionalPanel('input.predictions',
                         selectizeInput('prediction_team',
                                        'Select which team to predict',
                                        choices = as.factor(NFL$team),
-                                       selected = NULL)
+                                       selected = NULL
                         )
+                     )
                      
                  ),
             
             menuItem('Data', 
                      tabName = 'data', 
                      icon = icon('table')
-                    )
+            )
             
-                )
+        )
     ),
 
 # Body ------------------------------------------------
@@ -132,7 +135,7 @@ dashboardPage(
                         solidHeader = TRUE,
                         status = 'info',
                         p(class = 'text-center', img(src = 'nfl_teams.png', height = 200, width = 200)
-                          ),
+                        ),
                         p('The data set used in the dashboard consists of season wins, losses, and various offensive',
                           'and defensive statistics for each NFL team dating back to the 1999 season. The full,',
                           'uncleaned dataset can be found', 
@@ -144,8 +147,8 @@ dashboardPage(
                           'take into account drastic roster changes that may lead to significant changes in wins.',
                           'The dataset only contains stats such as total points scored, average yards per play, etc.',
                           'The full, cleaned dataset can be found on the Data tab.'
-                          )
-                        ),
+                         )
+                    ),
                     
                     box(
                         title = 'About the Dashboard',
@@ -165,7 +168,8 @@ dashboardPage(
                           'are options to create Gradient Boosted Trees and Principal Components Regression models',
                           'to predict the number of games a team will win next year. The user has the option to',
                           'adjust certain tuning parameters for each model. Finally, on the', strong("Data"), 'tab,',
-                          'the user can view and download the entire dataset or a dataset filtered by a team.')
+                          'the user can view and download the entire dataset or a dataset filtered by a team.'
+                         )
                     ),
                     
                     box(
