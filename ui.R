@@ -189,8 +189,8 @@ dashboardPage(
                         p('I am an avid sports fan and especially love college football', 
                         'and the NFL. I stick to my undergraduate roots when it comes to my college football team.',
                         'I was born and raised a Florida Gator fan and bleed', span("orange", style = "color:orange"),
-                        'and', span("blue.", style = "color:blue"), 'As for the NFL, my team is the Green Bay',
-                        'Packers.'
+                        'and', span("blue.", style = "color:blue"), 'As for the NFL, my team is the ',
+                        span("Green Bay Packers", style = "color:green"),'.'
                         ),
                         p('I had a lot of fun creating this application and hope you find it interesting to play',
                         'around with.', strong("Thank you!")
