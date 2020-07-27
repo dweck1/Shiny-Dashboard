@@ -102,7 +102,7 @@ shinyServer(function(input, output, session) {
   
   #Two cluster variables
   cluster_data <- reactive({
-    NFL[, c(input$clustering_var1, input$clustering_var2)]
+    as.data.frame(scale(NFL[, c(input$clustering_var1, input$clustering_var2)]))
   })
   
   #KMeans
